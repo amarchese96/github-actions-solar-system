@@ -71,4 +71,13 @@ jobs:
           method: kubeconfig
           kubeconfig: '${{ secrets.KUBECONFIG }}'
       - run: kubectl version --short -o yaml
+      - run: echo "INGRESS_IP=$(kubectl -n ingress-nginx get services ingress-nginx-controller -o jsonpath='{.status.loadBalancer.ingress[0].ip}')" >> $GITHUB_ENV
+      - uses: cschleiden/replace-tokens@v1
+        with:
+          tokenPrefix: '_{_'
+          tokenSuffix: '_}_'
+          files: '["kubernetes/development/*.yaml"]'
+        env:
+          IMAGE: ghcr.io/amarchese96/solar-system:${{ github.sha }}
+      - run: cat kubernetes/development/*.yaml
       
